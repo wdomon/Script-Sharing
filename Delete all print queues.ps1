@@ -21,4 +21,4 @@ $files | Remove-Item -Force
 Start-Service spooler
 
 
-LogWrite "ENDING Delete all print queues SCRIPT"
+LogWrite "** ENDING Delete all print queues Script **"
