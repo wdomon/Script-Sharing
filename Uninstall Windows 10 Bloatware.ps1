@@ -57,17 +57,25 @@ $bloatware = @(
 )
 
 foreach ($bloat in $bloatware) {
-    if (Get-AppxPackage -AllUsers $bloat) {
-        $app = Get-AppxPackage -allusers $bloat
+    if (($app = Get-AppxPackage -AllUsers $bloat) -and ($app.Name -notlike "*XboxGameCallableUI*")) {
         LogWrite "$($app.Name) app found. Uninstalling..."
-        Write-Progress -CurrentOperation "$($app.Name) app found. Uninstalling..." -Activity "Uninstalling"
-        $app | Remove-AppxPackage -allusers
+        try {
+            Write-Progress -CurrentOperation "$($app.Name) app found. Uninstalling..." -Activity "Uninstalling"
+            $app | Remove-AppxPackage -allusers -EA Stop
+        } catch {
+                LogWrite "Uninstall of $($app.Name) failed. Error is:"
+                LogWrite $_.Exception.Message
+        }                
     }
-    if (Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like $bloat}) {
-        $provapp = Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like $bloat}
+    if ($provapp = Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like $bloat}) {
         LogWrite "$($provapp.DisplayName) provisioned app found. Uninstalling..."
-        Write-Progress -CurrentOperation "$($provapp.DisplayName) provisioned app found. Uninstalling..." -Activity "Uninstalling"
-        $provapp | Remove-AppxProvisionedPackage -Online
+        try {
+            Write-Progress -CurrentOperation "$($provapp.DisplayName) provisioned app found. Uninstalling..." -Activity "Uninstalling"
+            $provapp | Remove-AppxProvisionedPackage -Online -EA Stop
+        } catch {
+                LogWrite "Uninstall of $($provapp.DisplayName) failed. Error is:"
+                LogWrite $_.Exception.Message
+        }
     }
 }
 
