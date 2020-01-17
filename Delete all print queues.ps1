@@ -14,11 +14,27 @@ function Get-TimeStamp {
 
 LogWrite "** STARTING Delete all print queues Script **"
 
-Stop-Service spooler -Force
+try {
+    Stop-Service spooler -Force -ErrorAction Stop
+} catch {
+        LogWrite "Unable to stop spooler service. Error message is:"
+        LogWrite $_.Exception.Message
+}
 $files = Get-ChildItem -Path "$env:SystemRoot\System32\spool\PRINTERS" -Force
-LogWrite "Removing $($files.Count) printer queue files"
-$files | Remove-Item -Force
-Start-Service spooler
+try {
+    LogWrite "Removing $($files.Count) printer queue files"
+    $files | Remove-Item -Force -ErrorAction Stop
+} catch {
+        LogWrite "Unable to delete all print jobs. Error message is:"
+        LogWrite $_.Exception.Message
+}
+try {
+    Start-Service spooler -ErrorAction Stop
+} catch {
+        LogWrite "Unable to start spooler service back up. Error message is:"
+        LogWrite $_.Exception.Message
+}
+
 
 
 LogWrite "** ENDING Delete all print queues Script **"
