@@ -1,7 +1,10 @@
 param (
-    [string]$url = '',
+    [ValidateNotNullOrEmpty()]
+    [string]$url = '', #Paste URL of XML file to be downloaded
+    [ValidateNotNullOrEmpty()]
     $xmlpath = "$ENV:SystemDrive\Scripts\WLAN-profile.xml"
 )
+
 
 #Downloads XML file containining WLAN profile from URL then runs command to import that WLAN profile
 
@@ -21,16 +24,14 @@ function Get-TimeStamp {
 
 LogWrite "**STARTING WLAN Profile SCRIPT**"
 
-
-$xmlpath = "$ENV:SystemDrive\Scripts\WLAN-profile.xml"
-
-
     try {
-        Invoke-WebRequest -Uri $url -OutFile $xmlpath
+        Invoke-WebRequest -Uri $url -OutFile $xmlpath -ErrorAction Stop
         LogWrite "Successfully downloaded file to $xmlpath!"
     } catch {
         LogWrite "Failed to download file. Exiting script with error:"
         LogWrite $_.Exception.Message
+        LogWrite "**ENDING WLAN Profile SCRIPT**"
+        Exit
     }
 
     try {
@@ -38,7 +39,7 @@ $xmlpath = "$ENV:SystemDrive\Scripts\WLAN-profile.xml"
         LogWrite "Successfully imported WLAN profile! Bob's your uncle!"
     } catch {
         LogWrite "Failed to import WLAN profile. Exiting script with error:"
-        LogWrite $_.Exception.Message
+        LogWrite $_.Exception.Message        
     }
 
 LogWrite "**ENDING WLAN Profile SCRIPT**"
